@@ -2,11 +2,10 @@
 
 **IPMage** is a tool for managing and updating your public IP address with DNS services. Currently, it supports Cloudflare, and it is designed to automatically update your DNS records if your public IP address changes.
 
-## Features
+## What it does
 
 - Fetches your current public IP address.
 - Automatically updates DNS records with Cloudflare if the IP address changes.
-- Configurable logging level.
 
 ## Requirements
 
