@@ -2,113 +2,92 @@ name: Build and Deploy
 
 on:
   workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Release version'
+        required: true
+        default: '1.0.0'
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        include:
-          - os: ubuntu-latest
-            framework: net8.0
-            rid: linux-x64
-          - os: windows-latest
-            framework: net8.0
-            rid: win-x64
-          - os: macos-latest
-            framework: net8.0
-            rid: osx-x64
+    runs-on: ${{ matrix.os }}
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
+    - uses: actions/checkout@v3
+    
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 8.x
-
+        dotnet-version: '8.0.x'
+        
     - name: Restore dependencies
       run: dotnet restore
-
-    - name: Build Solution
-      run: dotnet publish IPMage.sln -c Release -r ${{ matrix.rid }} --self-contained
-
-    - name: Upload artifacts for Linux
-      if: matrix.os == 'ubuntu-latest'
-      uses: actions/upload-artifact@v4
+      
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+      
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal
+      
+    - name: Publish
+      run: dotnet publish --configuration Release --runtime ${{ matrix.runtime }} --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -o ./publish
+      env:
+        matrix.runtime: ${{ matrix.os == 'ubuntu-latest' && 'linux-x64' || matrix.os == 'windows-latest' && 'win-x64' || 'osx-x64' }}
+      
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
       with:
-        name: linux-x64-binary
-        path: '**/bin/Release/net8.0/linux-x64/'
-
-    - name: Upload artifacts for Windows
-      if: matrix.os == 'windows-latest'
-      uses: actions/upload-artifact@v4
-      with:
-        name: win-x64-binary
-        path: '**/bin/Release/net8.0/win-x64/'
-
-    - name: Upload artifacts for macOS
-      if: matrix.os == 'macos-latest'
-      uses: actions/upload-artifact@v4
-      with:
-        name: osx-x64-binary
-        path: '**/bin/Release/net8.0/osx-x64/'
+        name: ${{ matrix.os }}-build
+        path: ./publish
 
   release:
     needs: build
     runs-on: ubuntu-latest
+    
     steps:
-    - name: Download Artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: linux-x64-binary
-        path: ./binaries/linux-x64/
-    
-    - name: Download Artifacts for Windows
-      uses: actions/download-artifact@v4
-      with:
-        name: win-x64-binary
-        path: ./binaries/win-x64/
-    
-    - name: Download Artifacts for macOS
-      uses: actions/download-artifact@v4
-      with:
-        name: osx-x64-binary
-        path: ./binaries/osx-x64/
-
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v1.0.0 # You can dynamically generate this or fetch from your project
-        release_name: Release v1.0.0
+        tag_name: v${{ github.event.inputs.release_version }}
+        release_name: Release ${{ github.event.inputs.release_version }}
         draft: false
         prerelease: false
-
-    - name: Upload Release Assets
+        
+    - name: Upload Release Asset (Linux)
       uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./binaries/linux-x64/
-        asset_name: linux-x64-binary
-        asset_content_type: application/zip
-
-    - name: Upload Windows Release Assets
+        asset_path: ./ubuntu-latest-build/IPMage
+        asset_name: IPMage-linux-x64
+        asset_content_type: application/octet-stream
+        
+    - name: Upload Release Asset (Windows)
       uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./binaries/win-x64/
-        asset_name: win-x64-binary
-        asset_content_type: application/zip
-
-    - name: Upload macOS Release Assets
+        asset_path: ./windows-latest-build/IPMage.exe
+        asset_name: IPMage-win-x64.exe
+        asset_content_type: application/octet-stream
+        
+    - name: Upload Release Asset (macOS)
       uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./binaries/osx-x64/
-        asset_name: osx-x64-binary
-        asset_content_type: application/zip
+        asset_path: ./macos-latest-build/IPMage
+        asset_name: IPMage-osx-x64
+        asset_content_type: application/octet-stream
