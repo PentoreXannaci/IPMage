@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Build and Deploy .NET 8 Console App
 
 on:
   workflow_dispatch:
@@ -8,14 +8,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, ubuntu-latest-arm64]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - os: ubuntu-latest
             framework: net8.0
             rid: linux-x64
-          - os: ubuntu-latest-arm64
-            framework: net8.0
-            rid: linux-arm64
           - os: windows-latest
             framework: net8.0
             rid: win-x64
@@ -25,10 +22,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.x
 
@@ -39,7 +36,7 @@ jobs:
       run: dotnet publish -c Release -r ${{ matrix.rid }} --self-contained -o ./publish
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.os }}-binary
         path: ./publish/
@@ -49,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Download Artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ${{ matrix.os }}-binary
         path: ./binaries/
