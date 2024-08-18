@@ -22,25 +22,26 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '8.0.x'
-        
+
     - name: Restore dependencies
       run: dotnet restore ./IPMage/IPMage.csproj
       
     - name: Build
       run: dotnet build ./IPMage/IPMage.csproj --configuration Release --no-restore
-      
+
     - name: Publish
+      shell: pwsh
       run: |
-        if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-          RUNTIME="linux-x64"
-        elif [ "${{ matrix.os }}" == "windows-latest" ]; then
-          RUNTIME="win-x64"
-        elif [ "${{ matrix.os }}" == "macos-latest" ]; then
-          RUNTIME="osx-x64"
-        else
-          echo "Unsupported OS"
-          exit 1
-        fi
+        $RUNTIME = if ($env:RUNNER_OS -eq "Windows") {
+            "win-x64"
+        } elseif ($env:RUNNER_OS -eq "Linux") {
+            "linux-x64"
+        } elseif ($env:RUNNER_OS -eq "macOS") {
+            "osx-x64"
+        } else {
+            Write-Error "Unsupported OS"
+            exit 1
+        }
         dotnet publish ./IPMage/IPMage.csproj --configuration Release --runtime $RUNTIME --self-contained true -p:PublishSingleFile=true -o ./publish
       
     - name: Upload artifact
