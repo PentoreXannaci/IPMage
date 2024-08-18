@@ -1,0 +1,12 @@
+﻿{
+  "logLevel":  "information",
+  "services": [
+    {
+      "serviceType": "cloudflare",
+      "name": "e.g. domainname.xyz",
+      "apiKey": "your-api",
+      "zoneId": "your-zone-id",
+      "recordId": "your-record-id"
+    }
+  ]
+}
