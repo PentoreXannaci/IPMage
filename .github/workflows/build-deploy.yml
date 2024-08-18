@@ -1,4 +1,4 @@
-name: Build and Deploy .NET 8 Console App
+name: Build and Deploy
 
 on:
   workflow_dispatch:
