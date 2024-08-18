@@ -39,21 +39,21 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       uses: actions/upload-artifact@v4
       with:
-        name: linux-x64-binary
+        name: IPMage-linux-x64
         path: '**/bin/Release/net8.0/linux-x64/'
 
     - name: Upload artifacts for Windows
       if: matrix.os == 'windows-latest'
       uses: actions/upload-artifact@v4
       with:
-        name: win-x64-binary
+        name: IPMage-win-x64
         path: '**/bin/Release/net8.0/win-x64/'
 
     - name: Upload artifacts for macOS
       if: matrix.os == 'macos-latest'
       uses: actions/upload-artifact@v4
       with:
-        name: osx-x64-binary
+        name: IPMage-osx-x64
         path: '**/bin/Release/net8.0/osx-x64/'
 
   release:
