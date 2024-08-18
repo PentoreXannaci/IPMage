@@ -6,7 +6,6 @@
 
 - Fetches your current public IP address.
 - Automatically updates DNS records with Cloudflare if the IP address changes.
-- Configurable logging level.
 
 ## Requirements
 
