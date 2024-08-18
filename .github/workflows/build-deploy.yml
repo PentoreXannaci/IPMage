@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Build and Release
 
 on:
   workflow_dispatch:
@@ -24,13 +24,13 @@ jobs:
         dotnet-version: '8.0.x'
         
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore ./IPMage/IPMage.csproj
       
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build ./IPMage/IPMage.csproj --configuration Release --no-restore
       
     - name: Publish
-      run: dotnet publish --configuration Release --runtime ${{ matrix.runtime }} --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -o ./publish
+      run: dotnet publish ./IPMage/IPMage.csproj --configuration Release --runtime ${{ matrix.runtime }} --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -o ./publish
       env:
         matrix.runtime: ${{ matrix.os == 'ubuntu-latest' && 'linux-x64' || matrix.os == 'windows-latest' && 'win-x64' || 'osx-x64' }}
       
