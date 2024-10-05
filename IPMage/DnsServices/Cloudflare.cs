@@ -105,7 +105,6 @@ public class Cloudflare : ServiceBase
     catch (Exception e)
     {
       Logger.LogError(e, "({type}, {name}) Exception updating IP", _settings.ServiceType, _settings.Name);
-      throw;
     }
   }
 }
