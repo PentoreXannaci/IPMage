@@ -78,7 +78,7 @@ public class DnsUpdateService : IHostedService, IDisposable
       return;
     }
 
-    _logger.LogDebug("Fetched IP: " + ip);
+    _logger.LogDebug("Fetched IP: {ip}", ip);
 
     // update all services with different IP.
     foreach (var service in _services.Where(service => service.CurrentIp != ip && service.Initialized))
